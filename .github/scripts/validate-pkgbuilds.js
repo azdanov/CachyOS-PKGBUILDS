@@ -7,7 +7,7 @@ const pkgbuildsDir = join(import.meta.dir, "..", "..");
 
 async function getChangedPkgbuilds() {
   const { stdout } =
-    await $`git diff --name-only ${process.env.BASE_REF} ${process.env.HEAD_REF}`
+    await $`git diff --diff-filter=d --name-only ${process.env.BASE_REF} ${process.env.HEAD_REF} "*/PKGBUILD"`
       .nothrow()
       .quiet();
 
@@ -16,11 +16,10 @@ async function getChangedPkgbuilds() {
     .trim()
     .split("\n")
     .filter(Boolean)
-    .filter((file) => file.endsWith("/PKGBUILD"))
     .map((file) => join(pkgbuildsDir, file, ".."));
 }
 
-async function getAllPkgbuilds() {
+function getAllPkgbuilds() {
   return readdirSync(pkgbuildsDir, {
     recursive: true,
     withFileTypes: true,
@@ -41,10 +40,10 @@ if (isPullRequest) {
   console.log(`Found ${pkgbuildFiles.length} changed PKGBUILD(s)`);
 } else if (isMainBranch && isPush) {
   console.log("Main branch - scanning all PKGBUILDs...");
-  pkgbuildFiles = await getAllPkgbuilds();
+  pkgbuildFiles = getAllPkgbuilds();
 } else {
   console.log("Manual trigger - scanning all PKGBUILDs...");
-  pkgbuildFiles = await getAllPkgbuilds();
+  pkgbuildFiles = getAllPkgbuilds();
 }
 
 if (pkgbuildFiles.length === 0) {
