@@ -1,9 +1,16 @@
 import { readdirSync } from "node:fs";
 import { join } from "node:path";
 import { $ } from "bun";
+import { styleText } from "node:util";
 
 const mainBranch = "master";
 const pkgbuildsDir = join(import.meta.dir, "..", "..");
+
+const colorMap = {
+  E: "red",
+  I: "blue",
+  W: "yellow",
+};
 
 async function getChangedPkgbuilds() {
   const { stdout } =
@@ -111,11 +118,18 @@ if (processedPkgbuilds.length > 0) {
             a.type.localeCompare(b.type) || a.code.localeCompare(b.code),
         )
         .forEach((detail) => {
-          console.log(`  [${detail.type}] ${detail.code}`);
+          const color = colorMap[detail.type];
+          if (color) {
+            console.log(
+              `  ${styleText(color, `[${detail.type}]`)} ${detail.code}`,
+            );
+          } else {
+            console.log(`  [${detail.type}] ${detail.code}`);
+          }
         });
       if (pkg.commandError) {
         console.log(
-          "  [CRITICAL] Additionally, An error occurred while processing this PKGBUILD",
+          `  ${styleText("redBright", "[CRITICAL]")} Additionally, An error occurred while processing this PKGBUILD`,
         );
       }
     });
