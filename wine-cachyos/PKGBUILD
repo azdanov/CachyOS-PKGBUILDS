@@ -6,12 +6,12 @@
 # Contributor: Giovanni Scafora <giovanni@archlinux.org>
 
 pkgname=wine-cachyos
-_srctag=10.0-20250820
+_srctag=10.0-20250919
 pkgver=${_srctag//-/.}
 _geckover=2.47.4
-_monover=10.0.0
+_monover=10.2.0
 _xaliaver=0.4.6
-pkgrel=1
+pkgrel=2
 epoch=2
 
 _pkgbasever=${pkgver/rc/-rc}
@@ -109,6 +109,10 @@ optdepends=(
   v4l-utils             lib32-v4l-utils
   vulkan-icd-loader     lib32-vulkan-icd-loader
 )
+optdepends+=(
+  ntsync-common
+  NTSYNC-MODULE
+)
 provides=("wine=10.0" 'wine-mono' 'wine-gecko')
 conflicts=('wine' 'wine-mono' 'wine-gecko')
 install=wine.install
@@ -121,7 +125,7 @@ prepare() {
   pushd $pkgname
   git config user.email "wine@cachyos.org"
   git config user.name "wine cachyos"
-  git tag wine-10.0 --annotate -m "$pkgver" --force
+  git tag wine-${_srctag} --annotate -m "$pkgver" --force
   ./tools/make_requests
   ./tools/make_specfiles
   ./dlls/winevulkan/make_vulkan -x vk.xml -X video.xml
@@ -140,7 +144,7 @@ build() {
 
   # From Proton
   OPTIMIZE_FLAGS="-O2 -march=$march -mtune=$mtune -mfpmath=sse -pipe -fipa-pta"
-  OPTIMIZE_FLAGS+=" -mprefer-avx128"
+  OPTIMIZE_FLAGS+=" -mprefer-avx128 -fvect-cost-model=cheap"
   SANITY_FLAGS="-fwrapv -fno-strict-aliasing -D_TIME_BITS=64 -D_FILE_OFFSET_BITS=64"
   DEBUG_FLAGS="-ffunction-sections -fdata-sections -fno-omit-frame-pointer"
   WARNING_FLAGS="-Wno-incompatible-pointer-types"
@@ -172,7 +176,7 @@ build() {
     --with-freetype \
     --with-mingw \
     --with-alsa \
-    --without-ffmpeg \
+    --with-ffmpeg \
     --without-oss \
     --disable-winemenubuilder \
     --disable-tests \
@@ -244,10 +248,10 @@ package() {
 }
 
 # vim:set ts=8 sts=2 sw=2 et:
-b2sums=('9b90b86db0065ebd18a57c102abd682ab97e01a6d8524a4e565b84ca6c9399bf06d9c527de3b1d4c7e5b0ade846d0c726afe63eaf2c78abb7ba74c497740638e'
+b2sums=('8ed4c636ffda1a153d1c011f49efc9e86255e837791faffcd9b85e4a1fe2263c1e0a544096e391fd1170ab28664aa6739cde27722934226efb221270eb6475d7'
         '2a73c12585b502ae11188482cbc9fb1f45f95bfe4383a7615011104b132f4845f9813d01fb40277e1934fab5f1b35ab40b4f4a66a9967463dd1d666a666904e9'
         '62856a88266b4757602c0646e024f832974a93f03b9df253fd4895d4f11a41b435840ad8f7003ec85a0d8087dec15f2e096dbfb4b01ebe4d365521e48fd0c5c0'
-        'a7efb7e9e3c03a92f3fc2c66172a2597ab4febfbf23a98c20d9ba46c48f0b96f568b21ea61f43cfa0cbbad2557cfafd665b63f3115611f0df9dd75ab358ecf43'
+        'c0c2c063de47b484758dc315496c4c8d477273ce286ab5408fbdf8aae2cb8187160faec151c1ecfc18a90a4c6f3b36df9c78097ddc862ee6056739c556af4ff8'
         '4d30eea9306392790677a4e19f7e416a387aaf10c4a7681aa8fcd94faf07be81a984b28ba1437428d7c215c5ecdbba70993091547068fbdc224e809c3f7abd85'
         '45db34fb35a679dc191b4119603eba37b8008326bd4f7d6bd422fbbb2a74b675bdbc9f0cc6995ed0c564cf088b7ecd9fbe2d06d42ff8a4464828f3c4f188075b'
         'e9de76a32493c601ab32bde28a2c8f8aded12978057159dd9bf35eefbf82f2389a4d5e30170218956101331cf3e7452ae82ad0db6aad623651b0cc2174a61588')
